@@ -12,6 +12,7 @@
     "bcrypt": "^5.0.1",
     "body-parse": "^0.1.0",
     "body-parser": "^1.19.0",
+    "crypto-js": "^4.0.0",
     "dotenv": "^9.0.2",
     "express": "^4.17.1",
     "express-bouncer": "^0.2.0",

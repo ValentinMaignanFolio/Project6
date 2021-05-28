@@ -1,6 +1,4 @@
 const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
-dotenv.config();
 
 // création d'une authentification appliquée à l'ensemble des routes
 module.exports = async (req, res, next) => {
