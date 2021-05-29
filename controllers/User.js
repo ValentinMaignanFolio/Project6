@@ -24,19 +24,16 @@ exports.signup = (req, res, next) => {
             req.body.password.length < 7){
             return res.status(401).json({message: 'La sécurité du mot de passe est insuffisante'});
         }
-
-        // cryptage de l'email avant enregistrement dans la base de données Mongo DB
-        var ciphertext = CryptoJS.AES.encrypt(req.body.email, process.env.KEY).toString();
-        console.log(ciphertext);
-        var bytes = CryptoJS.AES.decrypt(ciphertext, process.env.KEY);
-        var originalText = bytes.toString(CryptoJS.enc.Utf8);
- 
-        console.log(originalText); // 'my message'
-        // cryptage du mot de passe avant envoi à la BD
+        // cryptage de l'email fourni par l'utilisateur avant stockage Mongo DB
+        var key = CryptoJS.enc.Hex.parse(process.env.KEY);
+        var iv = CryptoJS.enc.Hex.parse(process.env.IV);
+        var encrypted = CryptoJS.AES.encrypt(req.body.email, key, { iv: iv }).toString();
+        console.log(encrypted);
+        
         bcrypt.hash(req.body.password, 10)
                 .then(hash => {
                 const user = new User({
-                    email: originalText,
+                    email: encrypted,
                     password: hash
                 });
                 // on enregistre le nouvel user avec un mot de passe crypté
@@ -50,10 +47,15 @@ exports.signup = (req, res, next) => {
         return res.status(401).json({message: 'Le mot de passe et le mail sont obligatoires'}); 
     }
 };
-
 // connexion de l'utilisateur
 exports.login = (req, res, next) => {
-    User.findOne({ email: req.body.email})
+    // cryptage de l'email fourni par l'utilisateur avant comparaison Mongo DB
+    var key = CryptoJS.enc.Hex.parse(process.env.KEY);
+    var iv = CryptoJS.enc.Hex.parse(process.env.IV);
+    var encrypted = CryptoJS.AES.encrypt(req.body.email, key, { iv: iv }).toString();
+    console.log(encrypted);
+        
+    User.findOne({ email: encrypted})
         .then(user => {
             if(!user){
                 return res.status(401).json({error: 'user not registered'});
